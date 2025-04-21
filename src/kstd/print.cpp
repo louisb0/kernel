@@ -37,3 +37,17 @@ void kstd::print(const char *s) {
         col++;
     }
 }
+
+
+void kstd::print(int v, bool hex) {
+    static char buffer[32]{};
+
+    int base = hex ? 16 : 10;
+
+    int i = 30;
+    for (; v && i; i--, v /= base) {
+        buffer[i] = "0123456789ABCDEF"[v % base];
+    }
+
+    kstd::print(&buffer[i + 1]);
+}
