@@ -19,19 +19,17 @@ extern "C" void kmain(multiboot_info* boot) {
         kstd::print("\n");
 
         kstd::print("Addr: 0x");
-        kstd::print(static_cast<uint32_t>(entry->addr), true);
+        kstd::print(entry->addr, true);
         kstd::print("\n");
 
         kstd::print("Length: 0x");
-        kstd::print(static_cast<uint32_t>(entry->len), true);
+        kstd::print(entry->len, true);
         kstd::print("\n");
 
         kstd::print("Size: ");
         kstd::print(entry->size);
         kstd::print("\n\n");
 
-        entry = reinterpret_cast<multiboot_mmap_entry*>(
-            reinterpret_cast<uintptr_t>(entry) + entry->size + sizeof(entry->size)
-        );
+        entry++;
     }
 }
