@@ -1,53 +1,97 @@
 #include <stddef.h>
+#include <stdarg.h>
 #include <stdint.h>
 
 #include "kstd/print.hpp"
+#include <hal/framebuffer.hpp>
+#include <kstd/string.hpp>
 
-namespace {
-    constexpr size_t vga_width = 80;
-    constexpr size_t vga_height = 25;
-    uint16_t* const vga_buffer = reinterpret_cast<uint16_t*>(0xB8000);
+static size_t x = 0;
+static size_t y = 0;
 
-    size_t row = 0;
-    size_t col = 0;
+void kstd::print(char c) {
+    if (c == '\n') {
+        x = 0;
+        y++;
+    }
+
+    if (x == hal::framebuffer::WIDTH) {
+        y++;
+        x = 0;
+    }
+
+    if (y == hal::framebuffer::HEIGHT) {
+        y = 0;
+        x = 0;
+    }
+
+    hal::framebuffer::put_char(c, x++, y);
 }
 
-void kstd::print(const char *s) {
-    while (*s != 0) {
-        if (*s == '\n') {
-            row++;
-            col = 0;
-            s++;
-            continue;
-        }
-
-        if (col == vga_width) {
-            row++;
-            col = 0;
-        }
-
-        if (row == vga_height) {
-            row = 0;
-            col = 0;
-        }
-
-        vga_buffer[row * vga_width + col] = *s | 0x0F00;
-
-        s++;
-        col++;
+void print_str(const char *s) {
+    while (*s != '\0') {
+        kstd::print(*s++);
     }
 }
 
+void kstd::vprint(const char *format, va_list args) {
+    while (*format) {
+        if (*format == '%') {
+            format++;
 
-void kstd::print(int v, bool hex) {
-    static char buffer[32]{};
+            switch (*format) {
+            case 'd': {
+                int val = va_arg(args, int);
+                if (val < 0) {
+                    print('-');
+                    val = -val;
+                }
 
-    int base = hex ? 16 : 10;
+                print_str(itoa(val, 10));
+                break;
+            }
 
-    int i = 30;
-    for (; v && i; i--, v /= base) {
-        buffer[i] = "0123456789ABCDEF"[v % base];
+            case 'x': {
+                int val = va_arg(args, int);
+                if (val < 0) {
+                    print('-');
+                    val = -val;
+                }
+
+                print_str(itoa(val, 16));
+                break;
+            }
+
+            case 's': {
+                const char* s = va_arg(args, const char*);
+                print_str(s);
+                break;
+            }
+
+            default:
+                print('%');
+                print(*format);
+                break;
+            }
+        } else {
+            print(*format);
+        }
+
+        format++;
     }
+}
 
-    kstd::print(&buffer[i + 1]);
+void kstd::print(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprint(format, args);
+    va_end(args);
+}
+
+void kstd::println(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprint(format, args);
+    va_end(args);
+    print('\n');
 }

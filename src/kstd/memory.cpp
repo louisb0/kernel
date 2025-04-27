@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "kstd/memory.hpp"
+#include <kstd/memory.hpp>
 
 void *kstd::memcpy(void *dest, const void *src, size_t n) {
     uint8_t *pdest = static_cast<uint8_t*>(dest);
