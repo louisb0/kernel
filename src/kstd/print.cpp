@@ -2,9 +2,16 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#include "kstd/print.hpp"
 #include <hal/framebuffer.hpp>
+#include <kstd/print.hpp>
 #include <kstd/string.hpp>
+
+namespace {
+    enum class length_modifier {
+        DEFAULT,
+        LONG_LONG,
+    };
+}
 
 static size_t x = 0;
 static size_t y = 0;
@@ -13,16 +20,17 @@ void kstd::print(char c) {
     if (c == '\n') {
         x = 0;
         y++;
+        return;
     }
 
     if (x == hal::framebuffer::WIDTH) {
-        y++;
         x = 0;
+        y++;
     }
 
     if (y == hal::framebuffer::HEIGHT) {
-        y = 0;
         x = 0;
+        y = 0;
     }
 
     hal::framebuffer::put_char(c, x++, y);
@@ -39,24 +47,29 @@ void kstd::vprint(const char *format, va_list args) {
         if (*format == '%') {
             format++;
 
+            length_modifier modifier = length_modifier::DEFAULT;
+            if (*format == 'l') {
+                format++;
+                if (*format == 'l') {
+                    format++;
+                    modifier = length_modifier::LONG_LONG;
+                } 
+            }
+
             switch (*format) {
-            case 'd': {
-                int val = va_arg(args, int);
-                if (val < 0) {
-                    print('-');
-                    val = -val;
-                }
+            case 'u': {
+                uint64_t val = (modifier == length_modifier::LONG_LONG) 
+                    ? va_arg(args, long long) 
+                    : va_arg(args, unsigned int);
 
                 print_str(itoa(val, 10));
                 break;
             }
 
             case 'x': {
-                int val = va_arg(args, int);
-                if (val < 0) {
-                    print('-');
-                    val = -val;
-                }
+                uint64_t val = (modifier == length_modifier::LONG_LONG) 
+                    ? va_arg(args, long long) 
+                    : va_arg(args, unsigned int);
 
                 print_str(itoa(val, 16));
                 break;

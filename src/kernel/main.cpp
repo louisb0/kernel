@@ -4,20 +4,17 @@
 #include <kernel/multiboot.h>
 #include <kstd/print.hpp>
 
-extern "C" void kmain(multiboot_info* boot) {
+extern "C" void kmain(multiboot_info_t* boot) {
     if (!(boot->flags & MULTIBOOT_INFO_MEM_MAP)) {
         kstd::println("No memory map provided");
         return;
     }
 
-    multiboot_mmap_entry *entry = reinterpret_cast<multiboot_mmap_entry *>(boot->mmap_addr);
-    multiboot_mmap_entry *end = reinterpret_cast<multiboot_mmap_entry *>(boot->mmap_addr + boot->mmap_length);
+    multiboot_memory_map_t* entry = reinterpret_cast<multiboot_memory_map_t*>(boot->mmap_addr);
+    multiboot_memory_map_t* end = reinterpret_cast<multiboot_memory_map_t*>(boot->mmap_addr + boot->mmap_length);
 
     while (entry < end) {
-        kstd::println("Type: %d", entry->type);
-        kstd::println("Address: 0x%x", entry->addr);
-        kstd::println("Length: 0x%x", entry->len);
-        kstd::println("Size: 0x%d\n", entry->size);
+        kstd::println("Type: %u, Address: 0x%llx, Length: 0x%llx", entry->type, entry->addr, entry->len);
 
         entry++;
     }

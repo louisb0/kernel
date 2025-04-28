@@ -5,11 +5,15 @@
 char *kstd::itoa(int value, size_t base) {
     static char buffer[32]{};
 
-    int i = 30;
-    for (; value && i; i--, value /= base) {
-        buffer[i] = "0123456789ABCDEF"[value % base];
+    int start = 30;
+    if (value == 0) {
+        buffer[start--] = '0';
     }
 
-    return &buffer[i + 1];
+    for (; value && start; start--, value /= base) {
+        buffer[start] = "0123456789ABCDEF"[value % base];
+    }
+
+    return &buffer[start + 1];
 }
 
