@@ -1,5 +1,7 @@
 #include <hal/memory.hpp>
 
+#include <kernel/multiboot.h>
+
 hal::memory_region hal::get_heap(multiboot_info_t* mbi) {
     hal::memory_region heap{};
 

@@ -2,6 +2,15 @@
 #include <stdint.h>
 
 #include <kstd/memory.hpp>
+#include <kernel/allocator.hpp>
+
+void* operator new(size_t size) {
+    return kernel::allocator::instance().allocate(size); 
+}
+
+void* operator new[](size_t size) {
+    return kernel::allocator::instance().allocate(size); 
+}
 
 void *kstd::memcpy(void *dest, const void *src, size_t n) {
     uint8_t *pdest = static_cast<uint8_t*>(dest);
