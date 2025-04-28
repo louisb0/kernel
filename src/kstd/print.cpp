@@ -9,6 +9,7 @@
 namespace {
     enum class length_modifier {
         DEFAULT,
+        LONG,
         LONG_LONG,
     };
 }
@@ -50,6 +51,8 @@ void kstd::vprint(const char *format, va_list args) {
             length_modifier modifier = length_modifier::DEFAULT;
             if (*format == 'l') {
                 format++;
+                modifier = length_modifier::LONG;
+
                 if (*format == 'l') {
                     format++;
                     modifier = length_modifier::LONG_LONG;
@@ -58,18 +61,24 @@ void kstd::vprint(const char *format, va_list args) {
 
             switch (*format) {
             case 'u': {
-                uint64_t val = (modifier == length_modifier::LONG_LONG) 
-                    ? va_arg(args, long long) 
-                    : va_arg(args, unsigned int);
+                uint64_t val;
+                switch (modifier) {
+                case length_modifier::LONG_LONG: val = va_arg(args, unsigned long long); break;
+                case length_modifier::LONG:
+                case length_modifier::DEFAULT: val = va_arg(args, unsigned int); break;
+                }
 
                 print_str(itoa(val, 10));
                 break;
             }
 
             case 'x': {
-                uint64_t val = (modifier == length_modifier::LONG_LONG) 
-                    ? va_arg(args, long long) 
-                    : va_arg(args, unsigned int);
+                uint64_t val;
+                switch (modifier) {
+                case length_modifier::LONG_LONG: val = va_arg(args, unsigned long long); break;
+                case length_modifier::LONG:
+                case length_modifier::DEFAULT: val = va_arg(args, unsigned int); break;
+                }
 
                 print_str(itoa(val, 16));
                 break;
