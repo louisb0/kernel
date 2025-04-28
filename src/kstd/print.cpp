@@ -23,17 +23,17 @@ void kstd::print(char c) {
         return;
     }
 
-    if (x == hal::framebuffer::WIDTH) {
+    if (x == hal::FRAME_WIDTH) {
         x = 0;
         y++;
     }
 
-    if (y == hal::framebuffer::HEIGHT) {
+    if (y == hal::FRAME_HEIGHT) {
         x = 0;
         y = 0;
     }
 
-    hal::framebuffer::put_char(c, x++, y);
+    hal::put_char(c, x++, y);
 }
 
 void print_str(const char *s) {
